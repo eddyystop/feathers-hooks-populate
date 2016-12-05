@@ -23,13 +23,13 @@ Populates items recursively. 1:1, 1:n and n:1 relationships are supported.
 const schema = {
   permissions: '...',
   include: [
-    { // 1:1
+    {
       service: 'users',
       nameAs: 'authorItem',
       parentField: 'author',
       childField: 'id',
     },
-    { // 1:n
+    {
       service: 'comments',
       parentField: 'id',
       childField: 'postId',
@@ -41,7 +41,7 @@ const schema = {
       select: (hook, parent, depth) => ({ $limit: 6 }),
       asArray: true,
     },
-    { // n:1
+    {
       service: 'users',
       permissions: '...',
       nameAs: 'readers',
@@ -116,13 +116,13 @@ Dot notation is allowed and will result in a query like `{ 'name.first': 'John' 
 which is not suitable for all DBs.
 You may use `query` or `select` to create a query suitable for your DB.
 - `query` [optional, object] An object to inject into the query in `service.find({ query: { ... } })`.
-- `select` [optional, function] A function whose result in injected into the query.
+- `select` [optional, function] A function whose result is injected into the query.
     - Function signature `(hook: Hook, parentItem: Object, depth: number): Object`
     - `hook` The hook.
     - `parentItem` The parent item to which we are joining.
     - `depth` How deep the include is in the schema. Top of schema is 0.
-- `asArray` [optional, boolean, default false] Force the joined item to be stored as an array.
-- `include` [optional] Items may be included with these new items. The includes are recursive.
+- `asArray` [optional, boolean, default false] Force a single joined item to be stored as an array.
+- `include` [optional] The new items may themselves include other items. The includes are recursive.
 
 #### Added properties
 
@@ -213,7 +213,7 @@ purchaseOrders.after({
 });
 ```
 
-The populate above will only be performed for users whose `permissions` contains `'invoices'`.
+The populate above will only be performed for users whose `roles` contains `'invoices'`.
 
 #### Relation
 
