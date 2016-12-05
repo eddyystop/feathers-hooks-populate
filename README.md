@@ -101,7 +101,8 @@ The `include` array has an element for each service to join. They each may have:
     $sort: {createdAt: -1}
   },
   select: (hook, parent, depth) => ({ $limit: 6 }),
-  asArray: true
+  asArray: true,
+  include: [ ... ]
 }
 ```
 
@@ -121,6 +122,7 @@ You may use `query` or `select` to create a query suitable for your DB.
     - `parentItem` The parent item to which we are joining.
     - `depth` How deep the include is in the schema. Top of schema is 0.
 - `asArray` [optional, boolean, default false] Force the joined item to be stored as an array.
+- `include` {optional] Items may be included with these new items.
 
 #### Added properties
 
@@ -137,7 +139,7 @@ Some additional properties are added to populated items. The result may look lik
       _computed: [ 'averageStars', 'views'],
       authorInfo: { ... },
       commentsInfo: [ { ... }, { ... } ],
-      readersInfo: [ { ... }, { ... } ],
+      readersInfo: [ { ... }, { ... } ]
 } }
 ```
 
