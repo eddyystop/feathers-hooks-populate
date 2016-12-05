@@ -17,6 +17,7 @@ Populates items *recursively* to any depth. Supports 1:1, 1:n and n:1 relationsh
 
 - Used as a **before** or **after** hook on any service method.
 - Supports multiple result items, including paginated `find`.
+- Permissions control what a user may see.
 - Provides performance profile information.
 - Backward compatible with the old Feathersjs `populate` hook.
 
