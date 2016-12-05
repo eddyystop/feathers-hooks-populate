@@ -112,7 +112,7 @@ The `include` array has an element for each service to join. They each may have:
 - `parentId` [required, string] The name of the field in the parent item for the [relation](#relation).
 Dot notation is allowed.
 - `childField` [required, string] The name of the field in the child item for the [relation](#relation).
-Dot notation is allowed and will result in a query like `{ name.first: 'John' }`
+Dot notation is allowed and will result in a query like `{ 'name.first': 'John' }`
 which is not suitable for all DBs.
 You may use `query` or `select` to create a query suitable for your DB.
 - `query` [optional, object] An object to inject into the query in `service.find({ query: { ... } })`.
@@ -122,7 +122,7 @@ You may use `query` or `select` to create a query suitable for your DB.
     - `parentItem` The parent item to which we are joining.
     - `depth` How deep the include is in the schema. Top of schema is 0.
 - `asArray` [optional, boolean, default false] Force the joined item to be stored as an array.
-- `include` {optional] Items may be included with these new items.
+- `include` [optional] Items may be included with these new items. The includes are recursive.
 
 #### Added properties
 
@@ -136,7 +136,7 @@ Some additional properties are added to populated items. The result may look lik
     { ...
       _include: [ 'authorInfo', 'commentsInfo', 'readersInfo' ],
       _elapsed: { authorInfo: 321973, commentsInfo: 469375, readersInfo: 479874, total: 487947 },
-      _computed: [ 'averageStars', 'views'],
+      _computed: [ 'averageStars', 'views' ],
       authorInfo: { ... },
       commentsInfo: [ { ... }, { ... } ],
       readersInfo: [ { ... }, { ... } ]
@@ -144,9 +144,9 @@ Some additional properties are added to populated items. The result may look lik
 ```
 
 - `_include` The property names containing joined items.
-- `_elapsed` The elapsed time, in nano-secs, taken to join each item type,
+- `_elapsed` The elapsed time, in nano-secs, taken to perform each include,
 as well as the total taken for them all.
-This is normally all DB activity.
+This delay is normally all DB activity.
 - `_computed` The property names containing values computed by the `serialize` hook.
 
 The `depopulate` hook uses these fields to remove all joined and computed values.
@@ -165,7 +165,7 @@ The following example shows how the client can ask for the type of schema it nee
 
 ```javascript
 // on client
-purchaseOrders.get(id, { query: { $nonQueryParams: { schema: 'po-acct' }}}) // pass schema to server
+purchaseOrders.get(id, { query: { $nonQueryParams: { schema: 'po-acct' }}}) // pass schema name to server
 // or
 purchaseOrders.get(id, { query: { $nonQueryParams: { schema: 'po-rec' }}})
 ````
@@ -213,7 +213,7 @@ purchaseOrders.after({
 });
 ```
 
-The populate above may only be performed by a user whose `permissions` contains `'invoices'`.
+The populate above will only be performed for users whose `permissions` contains `'invoices'`.
 
 #### Relation
 
