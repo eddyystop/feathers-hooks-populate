@@ -29,6 +29,7 @@ const schema = {
       nameAs: 'authorItem',
       parentField: 'author',
       childField: 'id',
+      include: [ ... ],
     },
     {
       service: 'comments',
