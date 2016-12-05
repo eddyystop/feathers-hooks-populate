@@ -13,7 +13,7 @@
 ### populate
 `populate(options: Object): HookFunc`
 
-Populates items recursively. Supports 1:1, 1:n and n:1 relationships.
+Populates items *recursively* to any depth. Supports 1:1, 1:n and n:1 relationships.
 
 - Used as a **before** or **after** hook on any service method.
 - Supports multiple result items, including paginated `find`.
