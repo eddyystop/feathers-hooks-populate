@@ -6,17 +6,17 @@
     - [Advanced examples](#advanced-examples)
         - [Selecting schema based on UI needs](#selecting-schema-based-on-ui-needs)
         - [Using permissions](#using-permissions)
-- [dePopulate][#depopulate]
+- [dePopulate](#depopulate)
 
 ### populate
 `populate(options: Object): HookFunc`
 
-Populates items recursively. 1:1, 1:n and n:1 relationships are supported.
+Populates items recursively. Supports 1:1, 1:n and n:1 relationships.
 
 - Used as a **before** or **after** hook on any service method.
 - Supports multiple result items, including paginated `find`.
 - Provides performance profile information.
-- Backward compatible with the old `populate` hook.
+- Backward compatible with the old Feathersjs `populate` hook.
 
 ```javascript
 const schema = {
@@ -127,11 +127,11 @@ Populate forms the query `[childField]: parentItem[parentField]` when the parent
 This will include all child items having that value.
 
 Populate forms the query `[childField]: { $in: parentItem[parentField] }` when the parent value is an array.
-This returns the child item if its included in the parent value.
+This will include all child items having any of those values.
 
 A populate hook for, say, `posts` may include items from `users`.
-Should `users` also use the populate hook, its user items will not be populated
-since they are being requested from within another populate.
+Should the `users` hooks also include a populate,
+that `users` populate hook will not be run for includes arising from `posts`.
 
 #### Added properties
 
@@ -153,9 +153,9 @@ Some additional properties are added to populated items. The result may look lik
 ```
 
 - `_include` The property names containing joined items.
-- `_elapsed` The elapsed time, in nano-secs, taken to perform each include,
+- `_elapsed` The elapsed time, in nano-secs (divide by 1e*6 for ms), taken to perform each include,
 as well as the total taken for them all.
-This delay is normally all DB activity.
+This delay is mostly attributed to your DB.
 - `_computed` The property names containing values computed by the `serialize` hook.
 
 The `depopulate` hook uses these fields to remove all joined and computed values.
