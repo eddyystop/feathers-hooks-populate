@@ -6,7 +6,6 @@
     - [Advanced examples](#advanced-examples)
         - [Selecting schema based on UI needs](#selecting-schema-based-on-ui-needs)
         - [Using permissions](#using-permissions)
-    - [Relation](#relation)
 - [dePopulate][#depopulate]
 
 ### populate
@@ -124,6 +123,16 @@ You may use `query` or `select` to create a query suitable for your DB.
 - `asArray` [optional, boolean, default false] Force a single joined item to be stored as an array.
 - `include` [optional] The new items may themselves include other items. The includes are recursive.
 
+Populate forms the query `[childField]: parentItem[parentField]` when the parent value is not an array.
+This will include all child items having that value.
+
+Populate forms the query `[childField]: { $in: parentItem[parentField] }` when the parent value is an array.
+This returns the child item if its included in the parent value.
+
+A populate hook for, say, `posts` may include items from `users`.
+Should `users` also use the populate hook, its user items will not be populated
+since they are being requested from within another populate.
+
 #### Added properties
 
 Some additional properties are added to populated items. The result may look like:
@@ -193,9 +202,11 @@ purchaseOrders.after({
 ##### Using permissions
 
 For a simplistic example,
-assume `hook.params.users.roles` is an array of the service names the user may use,
+assume `hook.params.users.permissions` is an array of the service names the user may use,
 e.g. `['invoices', 'billings']`.
 These can be used to control which types of items the user can see.
+
+The following populate will only be performed for users whose `user.permissions` contains `'invoices'`.
 
 ```javascript
 const schema = {
@@ -209,26 +220,9 @@ const schema = {
 };
 
 purchaseOrders.after({
-  all: populate(schema, (hook, service, permissions) => hook.params.user.roles.includes(permissions))
+  all: populate(schema, (hook, service, permissions) => hook.params.user.permissions.includes(permissions))
 });
 ```
-
-The populate above will only be performed for users whose `roles` contains `'invoices'`.
-
-#### Relation
-
-A 1:1 relation is when `parentField` and `childField` are primitive types.
-Both are unique in their table.
-Exactly one child item can be joined to the parent item.
-
-A 1:n relation is when `parentField` and `childField` are primitive types,
-and `childField` is not unique in its table.
-Many child items may be joined to the parent item.
-
-A n:1 relation is when `parentField` is an array and `childField` is a primitive type.
-Many child items may be joined to the parent item.
-A `$in` query operator is used for performance.
-
 
 ## dePopulate
 `dePopulate()`

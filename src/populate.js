@@ -1,7 +1,7 @@
 
 import errors from 'feathers-errors';
 import { getItems, replaceItems, getByDot, checkContext } from 'feathers-hooks-common/lib/utils';
-// import { populate as legacyPopulate } from 'feathers-hooks-common';
+import { populate as legacyPopulate } from 'feathers-hooks-common';
 
 export const populate = (options, ...rest) => hook => {
   const optionsDefault = {
@@ -11,7 +11,11 @@ export const populate = (options, ...rest) => hook => {
   };
 
   if (typeof options === 'string') {
-    // return legacyPopulate(options, ...rest);
+    return legacyPopulate(options, ...rest);
+  }
+
+  if (hook.params._populate === 'skip') { // this service call made by another populate
+    return hook;
   }
 
   return Promise.resolve()
@@ -146,7 +150,7 @@ function populateAddChild (options, hook, parentItem, childSchema, depth) {
         throw new errors.BadRequest(`Service ${childSchema.service} is not configured. (populate)`);
       }
 
-      return serviceHandle.find({ query });
+      return serviceHandle.find({ query, _populate: 'skip' });
     })
     .then(result => {
       result = result.data || result;
@@ -166,27 +170,6 @@ function populateAddChild (options, hook, parentItem, childSchema, depth) {
   return promise
     .then(items => ({ [nameAs]: items }));
 }
-
-export const dePopulate = () => hook => {
-  const items = getItems(hook);
-
-  (Array.isArray(items) ? items : [items]).forEach(item => {
-    if ('_computed' in item) {
-      item._computed.forEach(key => { delete item[key]; });
-      delete item._computed;
-    }
-
-    if ('_include' in item) {
-      item._include.forEach(key => { delete item[key]; });
-      delete item._include;
-    }
-
-    delete item._elapsed;
-  });
-
-  replaceItems(hook, items);
-  return hook;
-};
 
 // Helpers
 
