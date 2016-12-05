@@ -1,6 +1,6 @@
 
 import errors from 'feathers-errors';
-import { getItems, replaceItems, getByDot, checkContext } from 'feathers-hooks-common/lib/utils';
+import { getItems, replaceItems, getByDot } from 'feathers-hooks-common/lib/utils';
 import { populate as legacyPopulate } from 'feathers-hooks-common';
 
 export const populate = (options, ...rest) => hook => {
@@ -14,7 +14,7 @@ export const populate = (options, ...rest) => hook => {
     return legacyPopulate(options, ...rest);
   }
 
-  if (hook.params._populate === 'skip') { // this service call made by another populate
+  if (hook.params._populate === 'skip') { // this service call made from another populate
     return hook;
   }
 
@@ -22,9 +22,7 @@ export const populate = (options, ...rest) => hook => {
     .then(() => {
       // 'options.schema' resolves to { permissions: '...', include: [ ... ] }
 
-      checkContext(hook, 'after', null, 'populate');
       const items = getItems(hook);
-
       const options1 = Object.assign({}, optionsDefault, options);
       const { schema, checkPermissions } = options1;
       const schema1 = typeof schema === 'function' ? schema(hook, options1) : schema;

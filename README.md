@@ -6,6 +6,8 @@
     - [Advanced examples](#advanced-examples)
         - [Selecting schema based on UI needs](#selecting-schema-based-on-ui-needs)
         - [Using permissions](#using-permissions)
+- [serialize](#serialize)
+  - [Advanced example](#advanced-example)
 - [dePopulate](#depopulate)
 
 ### populate
@@ -85,6 +87,8 @@ const schema = {
 
 - `permissions` [optional, any type of value] Who is allowed to perform this populate. See `checkPermissions` above.
 - `include` [optional, array] Which services to join to the data.
+
+##### Include
 
 The `include` array has an element for each service to join. They each may have:
 
@@ -181,8 +185,8 @@ purchaseOrders.get(id, { query: { $nonQueryParams: { schema: 'po-rec' }}})
 ```javascript
 // on server
 const poSchemas = {
-  'po-acct': { /* schema for Accounting oriented PO */},
-  'po-rec': { /* schema for Receiving oriented PO */}
+  'po-acct': { /* populate schema for Accounting oriented PO */},
+  'po-rec': { /* populate schema for Receiving oriented PO */}
 };
 
 purchaseOrders.before({
@@ -224,10 +228,96 @@ purchaseOrders.after({
 });
 ```
 
+## serialize
+`serialize(schema: Object|Function): HookFunc`
+
+Remove selected information from populated items. Add new computed information.
+Intended for use with the `populate` hook.
+
+```javascript
+const schema = {
+  only: 'updatedAt',
+  computed: {
+    commentsCount: (recommendation, hook) => recommendation.post.commentsInfo.length,
+  },
+  post: {
+    exclude: ['id', 'createdAt', 'author', 'readers'],
+    authorInfo: {
+      exclude: ['id', 'password', 'age'],
+      computed: {
+        isUnder18: (authorInfo, hook) => authorInfo.age < 18,
+      },
+    },
+    readersInfo: {
+      exclude: 'id',
+    },
+    commentsInfo: {
+      only: ['title', 'content'],
+      exclude: 'content',
+    },
+  },
+};
+purchaseOrders.after({
+  all: [ populate( ... ), serialize(schema) ]
+});
+```
+
+Options
+
+- `schema` [required, object or function] How to serialize the items.
+    - Function signature `(hook: Hook): Object`
+    - `hook` The hook.
+    
+The schema reflects the structure of the populated items.
+The base items for the example above have [included](#include) `post` items,
+which themselves have included `authorInfo`, `readersInfo` and `commentsInfo` items.
+
+The schema for each set of items may have
+
+- `only` [optional, string or array of strings] The names of the fields to keep in each item.
+The names for included sets of items plus `_include` and `_elapsed` are not removed by `only`.
+- `exclude` [optional, string or array of strings] The names of fields to drop in each item.
+You may drop, at your own risk, names of included sets of items, `_include` and `_elapsed`.
+- `computed` [optional, object with functions] The new names you want added and how to compute their values.
+    - Object is like `{ name: func, ...}`
+    - `name` The name of the field to add to the items.
+    - `func` Function with signature `(item, hook)`.
+        - `item` The item with all its initial values, plus all of its included items.
+        The function can still reference values which will be later removed by `only` and `exclude`.
+        - `hook` The hook passed to serialize.
+
+#### Advanced example
+
+Consider an Employee item.
+The Payroll Manager would be permitted to see the salaries of other department heads.
+No other person would be allowed to see them.
+
+Using a function for `schema` allows you to select an appropriate schema based on the need.
+
+Assume `hook.params.user.roles` contains an array of roles which the user performs.
+The Employee item can be serialized differently for the Payroll Manager than for anyone else.
+
+```javascript
+const payrollSerialize = {
+  'payrollMgr': { /* serialization schema for Payroll Manager */},
+  'payroll': { /* serialization schema for others */}
+};
+
+employees.after({
+  all: [
+    populate( ... ),
+    serialize(hook => payrollSerialize[
+      hook.params.user.roles.contains('payrollMgr') ? 'payrollMgr' : 'payroll'
+    ])    
+  ]
+});
+```
+
 ## dePopulate
 `dePopulate()`
 
 Removes joined and computed properties, as well any profile information.
+Populated and serialized items may, after dePopulate, be used in `service.patch(id, items)` calls.
 
 - Used as a **before** or **after** hook on any service method.
 - Supports multiple result items, including paginated `find`.
