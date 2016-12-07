@@ -159,7 +159,7 @@ Some additional properties are added to populated items. The result may look lik
 ```
 
 - `_include` The property names containing joined items.
-- `_elapsed` The elapsed time, in nano-secs (divide by 1e*6 for ms), taken to perform each include,
+- `_elapsed` The elapsed time in nano-seconds (where 1,000,000 ns === 1 ms) taken to perform each include,
 as well as the total taken for them all.
 This delay is mostly attributed to your DB.
 - `_computed` The property names containing values computed by the `serialize` hook.
