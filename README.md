@@ -164,7 +164,7 @@ as well as the total taken for them all.
 This delay is mostly attributed to your DB.
 - `_computed` The property names containing values computed by the `serialize` hook.
 
-The `depopulate` hook uses these fields to remove all joined and computed values.
+The [depopulate](#depopulate) hook uses these fields to remove all joined and computed values.
 This allows you to then `service.patch()` the item in the hook.
 
 #### Advanced examples
@@ -318,7 +318,7 @@ employees.after({
 ## dePopulate
 `dePopulate()`
 
-Removes joined and computed properties, as well any profile information.
+Removes joined and [computed](#added-properties) properties, as well any profile information.
 Populated and serialized items may, after dePopulate, be used in `service.patch(id, items)` calls.
 
 - Used as a **before** or **after** hook on any service method.
