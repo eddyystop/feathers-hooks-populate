@@ -19,7 +19,7 @@ Populates items *recursively* to any depth. Supports 1:1, 1:n and n:1 relationsh
 - Supports multiple result items, including paginated `find`.
 - Permissions control what a user may see.
 - Provides performance profile information.
-- Backward compatible with the old Feathersjs `populate` hook.
+- Backward compatible with the old FeathersJS `populate` hook.
 
 ```javascript
 const schema = {
@@ -114,7 +114,7 @@ The `include` array has an element for each service to join. They each may have:
 - `service` [required, string] The name of the service providing the items.
 - `nameAs` [optional, string, default is service] Where to place the items from the join.
 - `permissions` [optional, any type of value] Who is allowed to perform this join. See `checkPermissions` above.
-- `parentId` [required, string] The name of the field in the parent item for the [relation](#relation).
+- `parentField` [required, string] The name of the field in the parent item for the [relation](#relation).
 Dot notation is allowed.
 - `childField` [required, string] The name of the field in the child item for the [relation](#relation).
 Dot notation is allowed and will result in a query like `{ 'name.first': 'John' }`
@@ -159,12 +159,12 @@ Some additional properties are added to populated items. The result may look lik
 ```
 
 - `_include` The property names containing joined items.
-- `_elapsed` The elapsed time, in nano-secs (divide by 1e*6 for ms), taken to perform each include,
+- `_elapsed` The elapsed time in nano-seconds (where 1,000,000 ns === 1 ms) taken to perform each include,
 as well as the total taken for them all.
 This delay is mostly attributed to your DB.
 - `_computed` The property names containing values computed by the `serialize` hook.
 
-The `depopulate` hook uses these fields to remove all joined and computed values.
+The [depopulate](#depopulate) hook uses these fields to remove all joined and computed values.
 This allows you to then `service.patch()` the item in the hook.
 
 #### Advanced examples
@@ -180,9 +180,9 @@ The following example shows how the client can ask for the type of schema it nee
 
 ```javascript
 // on client
-purchaseOrders.get(id, { query: { $nonQueryParams: { schema: 'po-acct' }}}) // pass schema name to server
+purchaseOrders.get(id, { query: { $client: { schema: 'po-acct' }}}) // pass schema name to server
 // or
-purchaseOrders.get(id, { query: { $nonQueryParams: { schema: 'po-rec' }}})
+purchaseOrders.get(id, { query: { $client: { schema: 'po-rec' }}})
 ````
 ```javascript
 // on server
@@ -193,10 +193,10 @@ const poSchemas = {
 
 purchaseOrders.before({
   all: hook => { // extract client schema info
-    const nonQueryParams = hook.params.query.$nonQueryParams;
-    if (nonQueryParams) {
-      delete hook.params.query.$nonQueryParams;
-      hook.parms = Object.assign({}, hook.params, nonQueryParams);
+    const client = hook.params.query.$client;
+    if (client) {
+      delete hook.params.query.$client;
+      hook.parms = Object.assign({}, hook.params, client);
     }
   }
 });
@@ -318,7 +318,7 @@ employees.after({
 ## dePopulate
 `dePopulate()`
 
-Removes joined and computed properties, as well any profile information.
+Removes joined and [computed](#added-properties) properties, as well any profile information.
 Populated and serialized items may, after dePopulate, be used in `service.patch(id, items)` calls.
 
 - Used as a **before** or **after** hook on any service method.
