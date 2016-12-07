@@ -19,7 +19,7 @@ Populates items *recursively* to any depth. Supports 1:1, 1:n and n:1 relationsh
 - Supports multiple result items, including paginated `find`.
 - Permissions control what a user may see.
 - Provides performance profile information.
-- Backward compatible with the old Feathersjs `populate` hook.
+- Backward compatible with the old FeathersJS `populate` hook.
 
 ```javascript
 const schema = {
