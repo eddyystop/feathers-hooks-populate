@@ -114,7 +114,7 @@ The `include` array has an element for each service to join. They each may have:
 - `service` [required, string] The name of the service providing the items.
 - `nameAs` [optional, string, default is service] Where to place the items from the join.
 - `permissions` [optional, any type of value] Who is allowed to perform this join. See `checkPermissions` above.
-- `parentId` [required, string] The name of the field in the parent item for the [relation](#relation).
+- `parentField` [required, string] The name of the field in the parent item for the [relation](#relation).
 Dot notation is allowed.
 - `childField` [required, string] The name of the field in the child item for the [relation](#relation).
 Dot notation is allowed and will result in a query like `{ 'name.first': 'John' }`
