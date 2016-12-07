@@ -180,9 +180,9 @@ The following example shows how the client can ask for the type of schema it nee
 
 ```javascript
 // on client
-purchaseOrders.get(id, { query: { $nonQueryParams: { schema: 'po-acct' }}}) // pass schema name to server
+purchaseOrders.get(id, { query: { $client: { schema: 'po-acct' }}}) // pass schema name to server
 // or
-purchaseOrders.get(id, { query: { $nonQueryParams: { schema: 'po-rec' }}})
+purchaseOrders.get(id, { query: { $client: { schema: 'po-rec' }}})
 ````
 ```javascript
 // on server
@@ -193,10 +193,10 @@ const poSchemas = {
 
 purchaseOrders.before({
   all: hook => { // extract client schema info
-    const nonQueryParams = hook.params.query.$nonQueryParams;
-    if (nonQueryParams) {
-      delete hook.params.query.$nonQueryParams;
-      hook.parms = Object.assign({}, hook.params, nonQueryParams);
+    const client = hook.params.query.$client;
+    if (client) {
+      delete hook.params.query.$client;
+      hook.parms = Object.assign({}, hook.params, client);
     }
   }
 });
