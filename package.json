@@ -65,6 +65,7 @@
     "feathers": "2.0.2",
     "feathers-hooks": "1.7.0",
     "feathers-memory": "1.0.1",
+    "feathers-tests-fake-app-users": "1.0.0",
     "istanbul": "1.1.0-alpha.1",
     "mocha": "3.2.0",
     "rimraf": "2.5.4",

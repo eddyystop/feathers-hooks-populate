@@ -3,50 +3,52 @@ import errors from 'feathers-errors';
 import { getItems, replaceItems, getByDot } from 'feathers-hooks-common/lib/utils';
 import { populate as legacyPopulate } from 'feathers-hooks-common';
 
-export const populate = (options, ...rest) => hook => {
-  const optionsDefault = {
-    schema: {},
-    checkPermissions: () => true,
-    profile: false
-  };
-
+export const populate = (options, ...rest) => {
   if (typeof options === 'string') {
     return legacyPopulate(options, ...rest);
   }
 
-  if (hook.params._populate === 'skip') { // this service call made from another populate
-    return hook;
-  }
+  return hook => {
+    const optionsDefault = {
+      schema: {},
+      checkPermissions: () => true,
+      profile: false
+    };
 
-  return Promise.resolve()
-    .then(() => {
-      // 'options.schema' resolves to { permissions: '...', include: [ ... ] }
-
-      const items = getItems(hook);
-      const options1 = Object.assign({}, optionsDefault, options);
-      const { schema, checkPermissions } = options1;
-      const schema1 = typeof schema === 'function' ? schema(hook, options1) : schema;
-      const permissions = schema1.permissions || null;
-
-      if (typeof checkPermissions !== 'function') {
-        throw new errors.BadRequest('Permissions param is not a function. (populate)');
-      }
-
-      if (permissions && !checkPermissions(hook, hook.path, permissions, 0)) {
-        throw new errors.BadRequest('Permissions do not allow this populate. (populate)');
-      }
-
-      if (typeof schema1 !== 'object') {
-        throw new errors.BadRequest('Schema does not resolve to an object. (populate)');
-      }
-
-      return !schema1.include || !Object.keys(schema1.include).length ? items
-        : populateItemArray(options1, hook, items, schema1.include, 0);
-    })
-    .then(items => {
-      replaceItems(hook, items);
+    if (hook.params._populate === 'skip') { // this service call made from another populate
       return hook;
-    });
+    }
+
+    return Promise.resolve()
+      .then(() => {
+        // 'options.schema' resolves to { permissions: '...', include: [ ... ] }
+
+        const items = getItems(hook);
+        const options1 = Object.assign({}, optionsDefault, options);
+        const { schema, checkPermissions } = options1;
+        const schema1 = typeof schema === 'function' ? schema(hook, options1) : schema;
+        const permissions = schema1.permissions || null;
+
+        if (typeof checkPermissions !== 'function') {
+          throw new errors.BadRequest('Permissions param is not a function. (populate)');
+        }
+
+        if (permissions && !checkPermissions(hook, hook.path, permissions, 0)) {
+          throw new errors.BadRequest('Permissions do not allow this populate. (populate)');
+        }
+
+        if (typeof schema1 !== 'object') {
+          throw new errors.BadRequest('Schema does not resolve to an object. (populate)');
+        }
+
+        return !schema1.include || !Object.keys(schema1.include).length ? items
+          : populateItemArray(options1, hook, items, schema1.include, 0);
+      })
+      .then(items => {
+        replaceItems(hook, items);
+        return hook;
+      });
+  };
 };
 
 function populateItemArray (options, hook, items, includeSchema, depth) {
@@ -105,6 +107,7 @@ function populateAddChild (options, hook, parentItem, childSchema, depth) {
       childField: 'postId',
       query: { $limit: 5, $select: ['title', 'content', 'postId'], $sort: { createdAt: -1 } },
       select: (hook, parent, depth) => ({ something: { $exists: false }}),
+      include: [ ... ],
     }
   */
 

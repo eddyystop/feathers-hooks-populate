@@ -27,7 +27,7 @@ export const serialize = schema => hook => {
     if (only) {
       const newItem = {};
       only.concat('_include', '_elapsed', item._include || []).forEach(key => {
-        betterSetByDot(newItem, key, getByDot(item, key), true);
+        setByDot(newItem, key, getByDot(item, key), true);
       });
       item = newItem;
     }
@@ -36,7 +36,7 @@ export const serialize = schema => hook => {
     exclude = typeof exclude === 'string' ? [exclude] : exclude;
     if (exclude) {
       exclude.forEach(key => {
-        betterSetByDot(item, key, undefined, true);
+        setByDot(item, key, undefined, true);
       });
     }
 
@@ -52,12 +52,3 @@ export const serialize = schema => hook => {
     return item;
   }
 };
-
-function betterSetByDot (item, key, value, ifDelete) { // remove when hooks-common upgraded
-  if (!key.includes('.') && value === undefined && ifDelete) {
-    delete item[key];
-    return;
-  }
-
-  setByDot(item, key, value, ifDelete);
-}
